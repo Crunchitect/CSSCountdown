@@ -1,0 +1,21 @@
+@import url(//dumbcss.pythonanywhere.com/test);
+@import url('./countdown.css');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+* { font-family: 'Space Mono'; }
+.countdown {
+    width: calc(var(--count) * 0.02px);
+    container: countdown / inline-size;
+    animation: counter calc(var(--count) * 1s) linear forwards;
+    position: absolute;
+    left: 15vw;
+    top: 30vh;
+}
+@keyframes counter { 100% { width: 0px; } }
+body {
+    overflow: hidden;
+}
+.num {
+    color: black;
+    font-size: 10rem;
+    font-weight: 900;
+}
