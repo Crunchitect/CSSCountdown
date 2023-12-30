@@ -3,14 +3,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 * { font-family: 'Space Mono'; }
 .countdown {
-    width: calc(var(--count) * 0.02px);
+    width: calc(var(--count) * 0.02px + 1250px);
     container: countdown / inline-size;
     animation: counter calc(var(--count) * 1s) linear forwards;
     position: absolute;
     left: 15vw;
     top: 30vh;
 }
-@keyframes counter { 100% { width: 0px; } }
+@keyframes counter { 100% { width: 1250px; } }
 body {
     overflow: hidden;
 }
