@@ -3,20 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <link rel="stylesheet" href="https://dumbcss.pythonanywhere.com/test"> -->
     <link rel="stylesheet" href="logic.css">
     <title>Counting Down</title>
 </head>
 <body>
-    <p style="text-align: center;">Made width 120069 lines of CSS and 0 lines of JS</p>
-    <p style="text-align: center;">Explanation coming soon™</p>
-    <div class="countdown">
-        <div class="content"></div>
-        <div class="num"></div>
+    <h1 class="title">CSS-Only New Year Countdown</h1>
+    <div class="flex-center"><img src="assets/coundown.png" alt="A showcase"></div>
+    <h1 id="how">How does it work?</h1>
+
+    <p>Let's break it down to 3 seperate parts.</p>
+    <div class="list">
+        <div class="item">
+            <div class="num"> 1</div>
+            <div class="content">Get the time.</div>
+        </div>
+        <div class="item">
+            <div class="num"> 2</div>
+            <div class="content">Counting down each second.</div>
+        </div>
+        <div class="item">
+            <div class="num"> 3</div>
+            <div class="content">Display it to the user.</div>
+        </div>
     </div>
-    <p style="text-align: center;">
-        <a href="https://www.youtube.com/channel/UCrF_jOZjibXwpMmikA1CJrQ">@crunchitect</a> - 
-        <a href="https://github.com/Crunchitect/CSSCountdown">Github</a>
+    <p>...Somehow.</p>
+
+    <h1 id="time">Get the time</h1>
+
+    <p>
+        So, how can we get the time in CSS?
+        I mean... There is no <code>--time</code> variable in CSS, right?
+    </p>
+
+    <p>
+        Yes, There isn't built-in datetime function in css.
+        But, there is something that we can abuse in getting the time.
+        Via, CSS <code>@import</code> rule.
+    </p>
+
+    <h1 id="CSSS">Server-side CSS</h1>
+    <p>
+        Yup, Going all out on this thing now. So, according do the MDN docs.
+    </p>
+    <blockquote>
+        <p>
+            The @import CSS at-rule is used to import style rules from other valid stylesheets...
+        </p>
+    </blockquote>
+    <p>
+        It can import from <strong>anywhere.</strong> Just needs to be valid CSS, right?
+        So, we can import CSS from a custom server. In my case, I use PythonAnywhere for the job.
+    </p>
+
+    <p>
+        Basically, We're going to <code>@import</code> CSS from a custom web server. My Flask server is just going to respond this.
+    </p>
+
+    <blockquote>
+        <p class="code">
+            :root {
+                --count: 195345 !important;
+                --try: 195345;
+            }
+        </p>
+    </blockquote>
+
+    <p>
+        The <code>--count</code> variable is the amount of seconds until New Year,
+        and <code>--try</code> is just a fallback value.
+        And <strong>Note: Don't forget to set the MIME/Content-Type type to `text/css` otherwise it will not apply your styles.</strong>
+    </p>
+
+    <p>
+        And there you got it. The time! Now Step 2, counting down.
+    </p>
+
+    <h1 id="tick">Counting down</h1>
+
+    <p>
+        So, we now have the current time stored in <code>--count</code>,
+        Now we will try to tick down every second. How should we do this?
+    </p>
+
+    <p>
+        Going from <code>--count</code> to <code>0</code> in a certain time...
+        Sounds familiar? Going from Point A to B in N time?
+
+        The <code>animation</code> property! Of course.
+    </p>
+
+    <p>
+        Another CSS at-rule we can abuse! We'll make a <code>div</code> with a class `countdown` that will
+        start with a width of `--count` pixels. and animate to 0px! Like this!
+    </p>
+
+    <blockquote>
+        <p class="code">
+            <br>
+            .countdown { <br> 
+        &nbsp;&nbsp;width: calc(var(--count) * 1px);<br>
+        &nbsp;&nbsp;animation: changeWidth calc(var(--count) * 1s) linear forwards;
+            <br>}
+            <br>
+            @keyframes changeWidth {<br>
+        &nbsp;&nbsp;to { width: 0px; } <br>
+            }<br>
+        </p>
+    </blockquote>
+
+    <p>
+        Now, we have A "countdown" via the width of the coundown div! Easy, right? But 1 pixel is too much. Maybe, a little bit smaller.
+        Say, What's the smallest unit for the counter to make it almost invisible?
+    </p>
+
+    <h1 id="smol">A rendering limitation</h1>
+
+    <p>
+        So, we want to display the <strong>smallest possible unit</strong> for the countdown to be the least noticable. What is the smallest unit?
+        After digging the chromium source the smallest possible unit (<code>LayoutUnit::Epsilon</code>) is <strong>1/64px</strong>.
+    </p>
+
+    <p>In renderer/geometry/layout_unit.h</p>
+    <blockquote>
+        <p class="code">
+            static const unsigned kLayoutUnitFractionalBits = 6;
+            static const int kFixedPointDenominator = 1 &gt;&gt; kLayoutUnitFractionalBits;
+            static constexpr float Epsilon() { return 1.0f / kFixedPointDenominator; }
+        </p>
+    </blockquote>
+
+    <p>Next up, displaying the countdown.</p>
+
+    <h1 id="show">Displaying the countdown.</h1>
+    
+    <p>
+        How can we detect an element's width, using only CSS. If you can see where I am heading with this.
+        Exactly, Another CSS at-rule to abuse! A new one, Actually. the <code>@container</code> at-rule. Again, To quote the MDN docs...
+    </p>
+
+    <blockquote>
+        <p>
+            The @container CSS at-rule is a conditional group rule that applies styles to a containment context. Style declarations are filtered by a condition and applied to the container if the condition is true. The condition is evaluated when the container changes size.
+        </p>
+    </blockquote>
+
+    <p>
+        Yup, Just like <code>@media</code> but with <strong>locality.</strong> So, We just jam a lot of these queries and we're done right?
+    </p>
+
+    <blockquote>
+        <p class="code">
+            ...<br>
+            @container (width &lt;= 0.08px) <br>{ .num::after { content: "0:00:04"; } }<br>
+            @container (width &lt;= 0.06px) <br>{ .num::after { content: "0:00:03"; } }<br>
+            @container (width &lt;= 0.04px) <br>{ .num::after { content: "0:00:02"; } }<br>
+            @container (width &lt;= 0.02px) <br>{ .num::after { content: "0:00:01"; } }<br>
+        </p>
+    </blockquote>
+
+    <p>
+        No, not really... There's anothert limitation according to these CSS media and container rules.
+    </p>
+    
+    <h1 id="ohno">The @media query limit.</h1>
+    
+    <p>
+        So, The <code>@media</code> and <code>@container</code> query only allows for <strong>65536 queries a page.</strong> Why?
+    </p>
+
+    <p>
+        The Chromium web browser stories the media queries in a list with a <strong>16-bit index.</strong>
+    </p>
+
+    <p>In css/CSSImportRule.idl</p>
+    <blockquote>
+        <p class="code">
+            interface CSSImportRule : CSSRule {
+                [TreatReturnedNullStringAs=Null] readonly attribute DOMString href;
+                readonly attribute MediaList media;
+                readonly attribute CSSStyleSheet styleSheet;
+            };
+        </p>
+    </blockquote>
+    <p>Which imports from css/MediaList.cpp</p>
+    <blockquote>
+        <p class="code">
+            MediaQuerySet::MediaQuerySet(const String& mediaString, bool fallbackToDescriptor)
+                : m_fallbackToDescriptor(fallbackToDescriptor)
+                , m_lastLine(0)
+            {
+                bool success = parse(mediaString);
+                if (!success)
+                    parse("invalid");
+            }
+
+        </p>
+    </blockquote>
+    <p>Which imports from css/MediaList.h</p>
+    <blockquote>
+        <p class="code">
+            class MediaList : public RefCounted&lt;MediaList&gt; {
+                public:
+                    static PassRefPtr&lt;MediaList&gt; create(MediaQuerySet* mediaQueries, CSSStyleSheet* parentSheet)
+                    {
+                        return adoptRef(new MediaList(mediaQueries, parentSheet));
+                    }
+                    static PassRefPtr&lt;MediaList&gt; create(MediaQuerySet* mediaQueries, CSSRule* parentRule)
+                    {
+                        return adoptRef(new MediaList(mediaQueries, parentRule));
+                    }
+                ...
+        </p>
+    </blockquote>
+    <p>Which imports from wtf/RefCounted.h</p>
+    <blockquote>
+        <p class="code">
+            ...
+            private:
+                #if CHECK_REF_COUNTED LIFECYCLE
+                    ...
+                #endif
+
+                unsinged m_refCount;
+        </p>
+    </blockquote>
+
+    <p>
+        Finally, we see the problem. <code>m_refCount</code> is an <code>unsigned</code> in a 16-bit build.
+        So, it overflows at 16 bits.
+    </p>
+
+    <p>
+        So, we need to setup a web server that will return less than 65536 media queries.
+    </p>
+
+    <h1>That's it!</h1>
+
+    <p>
+        See you again, When I implement a counter in puer web assembly so smth idk. Happy new year!
+    </p>
+
+    <p>
+        <a href="https://github.com/Crunchitect">My Git</a>
     </p>
 </body>
 </html>
